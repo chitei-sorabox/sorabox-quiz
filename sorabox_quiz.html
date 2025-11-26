@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>soraboxクイズ</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+      background: #f5fbff;
+      padding: 20px;
+      text-align: center;
+    }
+    .app {
+      max-width: 480px;
+      margin: 0 auto;
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 24px 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+    h1 {
+      margin-top: 0;
+      font-size: 22px;
+    }
+    .question {
+      font-size: 18px;
+      margin-bottom: 16px;
+    }
+    .choices {
+      text-align: left;
+      margin-bottom: 20px;
+    }
+    .choices button {
+      display: block;
+      width: 100%;
+      margin: 6px 0;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid #ddd;
+      background: #f9fcff;
+      cursor: pointer;
+      font-size: 15px;
+    }
+    .choices button:hover {
+      background: #e9f4ff;
+    }
+    #nextBtn {
+      padding: 10px 24px;
+      font-size: 15px;
+      border-radius: 999px;
+      border: none;
+      cursor: pointer;
+      background: #7fc3ff;
+      color: #fff;
+    }
+    #nextBtn:disabled {
+      background: #bcdfff;
+      cursor: default;
+    }
+    .status {
+      margin-top: 10px;
+      font-size: 14px;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <h1>🌤️ soraboxクイズ 🌤️</h1>
+    <p class="status" id="status">第1問</p>
+    <div class="question" id="questionText"></div>
+    <div class="choices" id="choices"></div>
+    <button id="nextBtn" disabled>つぎのもんだいへ ➜</button>
+    <div class="status" id="result"></div>
+  </div>
+
+  <script>
+    // soraboxクイズの問題たち
+    const questions = [
+      {
+        q: "Q1. soraboxがいちばん落ち着く場所はどこ？",
+        choices: ["空の上の雲の上", "海の底のサンゴの間", "地下のひみつきち"],
+        answer: 0
+      },
+      {
+        q: "Q2. soraboxのあたまの「くるくる」は、どんなイメージ？",
+        choices: ["風と光をあつめるアンテナ", "カラスよけ", "取っ手（持ち運び用）"],
+        answer: 0
+      },
+      {
+        q: "Q3. chiteiがsoraboxと一緒に届けたいものは？",
+        choices: ["やさしい光と風", "筋肉ムキムキ講座", "ホラー体験ツアー"],
+        answer: 0
+      }
+    ];
+
+    let currentIndex = 0;
+    let score = 0;
+    let answered = false;
+
+    const questionText = document.getElementById("questionText");
+    const choicesDiv = document.getElementById("choices");
+    const nextBtn = document.getElementById("nextBtn");
+    const status = document.getElementById("status");
+    const result = document.getElementById("result");
+
+    function showQuestion() {
+      answered = false;
+      nextBtn.disabled = true;
+      result.textContent = "";
+
+      const q = questions[currentIndex];
+      status.textContent = `第${currentIndex + 1}問`;
+      questionText.textContent = q.q;
+
+      choicesDiv.innerHTML = "";
+      q.choices.forEach((choice, index) => {
+        const btn = document.createElement("button");
+        btn.textContent = choice;
+        btn.onclick = () => selectAnswer(index);
+        choicesDiv.appendChild(btn);
+      });
+    }
+
+    function selectAnswer(index) {
+      if (answered) return;
+      answered = true;
+      const q = questions[currentIndex];
+
+      const buttons = choicesDiv.querySelectorAll("button");
+      buttons.forEach((btn, i) => {
+        btn.disabled = true;
+        if (i === q.answer) {
+          btn.style.borderColor = "#50c878";
+        }
+        if (i === index && i !== q.answer) {
+          btn.style.borderColor = "#ff6b6b";
+        }
+      });
+
+      if (index === q.answer) {
+        score++;
+        result.textContent = "⭕ 正解！";
+      } else {
+        result.textContent = "❌ ざんねん…";
+      }
+
+      nextBtn.disabled = false;
+      if (currentIndex === questions.length - 1) {
+        nextBtn.textContent = "けっかをみる ✨";
+      } else {
+        nextBtn.textContent = "つぎのもんだいへ ➜";
+      }
+    }
+
+    nextBtn.addEventListener("click", () => {
+      if (currentIndex < questions.length - 1) {
+        currentIndex++;
+        showQuestion();
+      } else {
+        showFinalResult();
+      }
+    });
+
+    function showFinalResult() {
+      questionText.textContent = "🏁 クイズおわり！";
+      choicesDiv.innerHTML = "";
+      status.textContent = "結果発表";
+
+      result.textContent =
+        `全${questions.length}問中 ${score}問 正解でした！ ` +
+        (score === questions.length
+          ? "すごい…！soraboxマスター✨"
+          : "またチャレンジしてね☁️");
+      nextBtn.disabled = true;
+    }
+
+    // 最初の問題を表示
+    showQuestion();
+  </script>
+</body>
+</html>
